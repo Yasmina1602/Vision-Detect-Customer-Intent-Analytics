@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Boshqa platforma — test do'kon</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 15px/1.5 Georgia, "Times New Roman", serif; background: #fffaf3; color: #2b2118; }
+    header { background: #2b2118; color: #fffaf3; }
+    .bar { max-width: 1000px; margin: 0 auto; padding: 16px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .bar b { font-size: 22px; letter-spacing: .5px; }
+    .bar form { flex: 1; min-width: 220px; display: flex; }
+    .bar input[name=s] { flex: 1; height: 40px; border: 0; border-radius: 6px; padding: 0 12px; font-size: 15px; }
+    main { max-width: 1000px; margin: 0 auto; padding: 24px 16px 60px; }
+    .setup { background: #fff; border: 1px solid #e8dccb; border-radius: 10px; padding: 16px; margin-bottom: 24px; font-family: system-ui, sans-serif; font-size: 14px; }
+    .setup input { width: 100%; height: 36px; margin: 4px 0 10px; padding: 0 10px; border: 1px solid #d6c7ad; border-radius: 6px; font-family: monospace; }
+    .setup button { height: 36px; padding: 0 16px; border: 0; border-radius: 6px; background: #2b2118; color: #fff; cursor: pointer; }
+    .ok { color: #15803d; } .warn { color: #b45309; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 18px; }
+    .p { background: #fff; border: 1px solid #e8dccb; border-radius: 10px; padding: 12px; }
+    .p .img { aspect-ratio: 1; border-radius: 8px; background: linear-gradient(135deg, #f5e6cf, #e2c79f); display: grid; place-items: center; font-size: 42px; }
+    .p button { width: 100%; margin-top: 8px; height: 34px; border: 0; border-radius: 6px; background: #8a5a2b; color: #fff; cursor: pointer; }
+    code { background: #f5ecdf; padding: 1px 5px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <b>Antiqa Bozor</b>
+    <form onsubmit="event.preventDefault()"><input name="s" placeholder="Qidirish..." aria-label="Qidirish"></form>
+  </div>
+</header>
+<main>
+  <div class="setup">
+    <p style="margin-top:0"><b>Test sozlamasi</b> — bu sahifa "boshqa platforma"ni (Vision Detect'ga aloqasi yo'q sayt) taqlid qiladi.
+      Real saytda faqat bitta teg bo'ladi: <code>&lt;script src="API/cdn/v1/loader.js" data-key="pk_live_…" async&gt;&lt;/script&gt;</code></p>
+    <label>API manzili<input id="api" placeholder="http://127.0.0.1:8000"></label>
+    <label>Public key (Dashboard → Integratsiya)<input id="pk" placeholder="pk_live_…"></label>
+    <button onclick="save()">Saqlash va vidjetni ulash</button>
+    <span id="st" style="margin-left:10px"></span>
+  </div>
+
+  <h2>Mahsulotlarimiz</h2>
+  <div class="grid">
+    <div class="p"><div class="img">👟</div><p>Charm krossovka</p><button onclick="buy('101', 48900000)">Savatga</button></div>
+    <div class="p"><div class="img">🧥</div><p>Qishki kurtka</p><button onclick="buy('205', 89000000)">Savatga</button></div>
+    <div class="p"><div class="img">👜</div><p>Qora sumka</p><button onclick="buy('301', 59000000)">Savatga</button></div>
+    <div class="p"><div class="img">⌚</div><p>Smart soat</p><button onclick="buy('401', 129000000)">Savatga</button></div>
+  </div>
+
+  <div data-vd-recs data-title="Sizga yoqishi mumkin" style="margin-top:40px"></div>
+</main>
+
+<script>
+  // Sozlamani saqlash (faqat shu test sahifa uchun). Haqiqiy saytda bu qism kerak emas.
+  var api = localStorage.getItem("t_api") || "http://127.0.0.1:8000";
+  var pk = localStorage.getItem("t_pk") || new URLSearchParams(location.search).get("key") || "";
+  document.getElementById("api").value = api;
+  document.getElementById("pk").value = pk;
+  function save() {
+    localStorage.setItem("t_api", document.getElementById("api").value.trim().replace(/\/$/, ""));
+    localStorage.setItem("t_pk", document.getElementById("pk").value.trim());
+    location.reload();
+  }
+  // Sotuvchi o'z savatiga qo'shgach, analitikaga xabar beradi (1 qator)
+  function buy(id, priceMinor) {
+    window.VisionAnalytics && VisionAnalytics.track && VisionAnalytics.track("ADD_TO_CART", { id: id, qty: 1, price_minor: priceMinor, currency: "UZS" });
+    alert("Savatga qo'shildi (test). Dashboard → Qidiruvlar/Savatlar bo'limida ko'rinadi.");
+  }
+  var st = document.getElementById("st");
+  if (pk) {
+    // ↓↓↓ Haqiqiy saytda shu bitta teg: ↓↓↓
+    var s = document.createElement("script");
+    s.src = api + "/cdn/v1/loader.js"; s.async = true; s.setAttribute("data-key", pk);
+    s.onerror = function () { st.textContent = "Loader yuklanmadi — API ishlayaptimi?"; st.className = "warn"; };
+    s.onload = function () {
+      setTimeout(function () {
+        var ok = window.__vd && window.__vd.ready;
+        st.textContent = ok ? "Vidjet ulandi ✓ — qidiruv maydoni yonidagi 📷 tugmani bosing" : "Kalit noto'g'ri yoki domen allowlist'da yo'q";
+        st.className = ok ? "ok" : "warn";
+      }, 1500);
+    };
+    document.body.appendChild(s);
+  } else { st.textContent = "Public key kiriting"; st.className = "warn"; }
+</script>
+</body>
+</html>

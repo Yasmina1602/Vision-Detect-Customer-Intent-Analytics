@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Demo Shop — oddiy HTML sayt</title>
+  <style>
+    :root { --ink:#0f172a; --muted:#64748b; --line:#e5e7eb; --bg:#f8fafc; --brand:#0f766e; }
+    * { box-sizing: border-box; }
+    body { margin:0; font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); }
+    header { background:#fff; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:10; }
+    .bar { max-width:1100px; margin:0 auto; padding:14px 16px; display:flex; gap:16px; align-items:center; }
+    .logo { font-weight:800; font-size:20px; color:var(--brand); text-decoration:none; white-space:nowrap; }
+    form.search { flex:1; display:flex; align-items:center; background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:0 6px 0 14px; }
+    form.search input { flex:1; border:0; background:transparent; height:42px; font-size:15px; outline:none; min-width:0; }
+    .cart { position:relative; text-decoration:none; color:var(--ink); font-weight:600; white-space:nowrap; }
+    .cart b { background:var(--brand); color:#fff; border-radius:999px; padding:1px 8px; font-size:12px; margin-left:4px; }
+    main { max-width:1100px; margin:0 auto; padding:24px 16px 64px; }
+    .hero { background:linear-gradient(135deg,#0f766e,#115e59); color:#fff; border-radius:20px; padding:28px; margin-bottom:28px; }
+    .hero h1 { margin:0 0 6px; font-size:26px; } .hero p { margin:0; opacity:.9; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:18px; }
+    .card { background:#fff; border:1px solid var(--line); border-radius:16px; overflow:hidden; display:flex; flex-direction:column; }
+    .card img { width:100%; aspect-ratio:1; object-fit:cover; display:block; background:#eee; }
+    .card .in { padding:12px 14px 14px; display:flex; flex-direction:column; gap:6px; flex:1; }
+    .card a { color:inherit; text-decoration:none; font-weight:600; }
+    .price { font-weight:800; }
+    button.add { margin-top:auto; height:38px; border:0; border-radius:10px; background:var(--brand); color:#fff; font-weight:600; cursor:pointer; }
+    button.add:disabled { background:#cbd5e1; cursor:not-allowed; }
+    .detail { display:grid; grid-template-columns:minmax(0,420px) 1fr; gap:28px; background:#fff; border:1px solid var(--line); border-radius:20px; padding:20px; }
+    .detail img { width:100%; border-radius:14px; }
+    @media (max-width:700px) { .detail { grid-template-columns:1fr; } .hero h1 { font-size:21px; } }
+    .note { background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; padding:12px 14px; border-radius:12px; font-size:14px; margin-bottom:20px; }
+    .checkout { display:inline-block; margin-top:12px; background:var(--ink); color:#fff; padding:10px 16px; border-radius:10px; text-decoration:none; font-weight:600; }
+  </style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <a class="logo" href="/demo/vanilla">Demo Shop</a>
+    <form class="search" onsubmit="event.preventDefault(); load(this.q.value)">
+      <input type="search" name="q" placeholder="Mahsulot qidirish…" aria-label="Qidirish">
+    </form>
+    <a class="cart" href="#" id="cartLink">Savat <b id="cartCount">0</b></a>
+  </div>
+</header>
+<main>
+  <div class="note">Bu — vidjet ulangan <b>oddiy HTML sayt</b> namunasi. Qidiruv maydoni yonidagi 📷 tugmani bosing va mahsulot rasmini yuklang
+    (demo rejimda rang rasmdan, tur esa fayl nomidan aniqlanadi — masalan <code>qizil-krossovka.jpg</code>).</div>
+  <div id="view"></div>
+  <!-- Shaxsiy tavsiyalar (target): vidjet shu blokni xaridor qiziqishiga mos mahsulotlar bilan to'ldiradi -->
+  <div data-vd-recs data-title="Siz uchun" data-limit="4" style="margin-top:40px"></div>
+</main>
+
+<script>
+  var API = "{{API}}", PK = "{{PK}}";
+  var cart = JSON.parse(localStorage.getItem("demo_cart") || "[]");
+  function fmt(m) { return new Intl.NumberFormat("uz-UZ").format(m / 100) + " so'm"; }
+  function esc(s) { return String(s || "").replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function renderCart() {
+    document.getElementById("cartCount").textContent = cart.reduce(function (a, i) { return a + i.qty; }, 0);
+  }
+  function addToCart(p) {
+    var it = cart.find(function (i) { return i.id === p.id; });
+    it ? it.qty++ : cart.push({ id: p.id, qty: 1, price_minor: p.price_minor, name: p.name });
+    localStorage.setItem("demo_cart", JSON.stringify(cart)); renderCart();
+    // Sotuvchi sayti o'z savatiga qo'shgach, analitikaga xabar beradi (1 qator):
+    window.VisionAnalytics && VisionAnalytics.track && VisionAnalytics.track("ADD_TO_CART", { id: p.id, qty: 1, price_minor: p.price_minor, currency: "UZS" });
+  }
+  // Vidjetdagi "Savatga" tugmasi uchun maxsus callback (2-daraja adapter)
+  window.VisionAnalytics = window.VisionAnalytics || {};
+  window.VisionAnalytics.onAddToCart = function (p) {
+    var it = cart.find(function (i) { return i.id === p.id; });
+    it ? it.qty++ : cart.push({ id: p.id, qty: 1, price_minor: p.price_minor, name: p.name });
+    localStorage.setItem("demo_cart", JSON.stringify(cart)); renderCart(); return true;
+  };
+  document.getElementById("cartLink").onclick = function (e) {
+    e.preventDefault();
+    var total = cart.reduce(function (a, i) { return a + i.qty * i.price_minor; }, 0);
+    var v = document.getElementById("view");
+    v.innerHTML = "<h2>Savat</h2>" + (cart.length ? cart.map(function (i) { return "<div>" + esc(i.name) + " × " + i.qty + " — " + fmt(i.qty * i.price_minor) + "</div>"; }).join("") +
+      "<p><b>Jami: " + fmt(total) + "</b></p><a class='checkout' href='#' id='buy'>Buyurtma berish</a>" : "<p>Savat bo'sh</p>");
+    var buy = document.getElementById("buy");
+    buy && (buy.onclick = function (ev) {
+      ev.preventDefault();
+      var order = "DEMO-" + Date.now().toString().slice(-6);
+      var items = JSON.stringify(cart.map(function (i) { return { id: i.id, qty: i.qty, price_minor: i.price_minor }; }));
+      cart = []; localStorage.setItem("demo_cart", "[]");
+      location.href = "/demo/vanilla/thanks?order=" + order + "&items=" + encodeURIComponent(items);
+    });
+  };
+  function load(q) {
+    fetch(API + "/v1/public/products?limit=24&q=" + encodeURIComponent(q || ""), { headers: { "X-Vision-Key": PK } })
+      .then(function (r) { return r.json(); }).then(function (d) {
+        var pid = new URLSearchParams(location.search).get("product");
+        var p = pid && d.products.find(function (x) { return x.id === pid; });
+        var v = document.getElementById("view");
+        if (p && !q) {
+          v.innerHTML = "<div class='detail'><img src='" + esc(p.image_url) + "' alt=''><div><h1>" + esc(p.name) + "</h1><p class='price' style='font-size:22px'>" + fmt(p.price_minor) +
+            "</p><p>" + (p.in_stock ? "Mavjud" : "Tugagan") + "</p><button class='add' id='addOne' " + (p.in_stock ? "" : "disabled") + " style='padding:0 20px'>Savatga qo'shish</button></div></div>";
+          document.getElementById("addOne").onclick = function () { addToCart(p); };
+          return;
+        }
+        v.innerHTML = "<div class='hero'><h1>Yangi kolleksiya</h1><p>Rasmdagi mahsulotni topa olmayapsizmi? 📷 tugma orqali rasm yuklang.</p></div><div class='grid'>" +
+          d.products.map(function (p, i) {
+            return "<div class='card'><a href='?product=" + esc(p.id) + "'><img src='" + esc(p.image_url) + "' alt=''></a><div class='in'><a href='?product=" + esc(p.id) + "'>" + esc(p.name) +
+              "</a><div class='price'>" + fmt(p.price_minor) + "</div><button class='add' data-i='" + i + "' " + (p.in_stock ? "" : "disabled") + ">" + (p.in_stock ? "Savatga" : "Tugagan") + "</button></div></div>";
+          }).join("") + "</div>";
+        Array.prototype.forEach.call(v.querySelectorAll("button.add"), function (b) { b.onclick = function () { addToCart(d.products[+b.dataset.i]); }; });
+      });
+  }
+  renderCart(); load("");
+</script>
+
+<!-- ↓↓↓ Vidjet: bitta teg ↓↓↓ -->
+<script src="{{API}}/cdn/v1/loader.js" data-key="{{PK}}" async></script>
+</body>
+</html>

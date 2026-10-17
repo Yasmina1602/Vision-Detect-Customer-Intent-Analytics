@@ -1,0 +1,20 @@
+# systemd xizmati: API + fon vazifalari (bitta jarayon). O'rnatish:
+#   sudo cp vision-api.service /etc/systemd/system/ && sudo systemctl daemon-reload
+#   sudo systemctl enable --now vision-api      # holat: systemctl status vision-api, log: journalctl -u vision-api -f
+[Unit]
+Description=Vision Detect API (Basic edition)
+After=network.target mysql.service
+
+[Service]
+User=vision
+WorkingDirectory=/opt/vision-basic/apps/api
+# Sozlamalar /opt/vision-basic/.env dan ilovaning o'zi o'qiydi (EnvironmentFile kerak emas)
+# --workers 1: fon vazifalari (RUN_WORKER_IN_API=true) bir marta ishlashi uchun. Yuk oshsa: workers 2+ va
+# alohida "python -m app.workers.run" xizmati (RUN_WORKER_IN_API=false).
+ExecStart=/opt/vision-basic/apps/api/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 --proxy-headers --forwarded-allow-ips=127.0.0.1
+Restart=always
+RestartSec=3
+MemoryMax=600M
+
+[Install]
+WantedBy=multi-user.target

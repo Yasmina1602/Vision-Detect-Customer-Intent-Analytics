@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 246 247 251;
+  --surface: 255 255 255;
+  --subtle: 241 243 248;
+  --line: 228 231 239;
+  --ink: 15 23 42;
+  --muted: 100 116 139;
+  --brand: 109 40 217;
+  --brand-soft: 237 233 254;
+  --brand-ink: 91 33 182;
+  --ok: 22 163 74;
+  --ok-soft: 220 252 231;
+  --warn: 217 119 6;
+  --warn-soft: 254 243 199;
+  --bad: 220 38 38;
+  --bad-soft: 254 226 226;
+  /* dataviz reference palette — kategorik tartib o'zgarmaydi */
+  --chart-1: #2a78d6;
+  --chart-2: #eb6834;
+  --chart-3: #1baf7a;
+  --chart-4: #eda100;
+  --chart-seq: #2a78d6;
+  --chart-grid: #e5e7eb;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: 11 13 20;
+  --surface: 20 23 33;
+  --subtle: 28 32 45;
+  --line: 40 45 61;
+  --ink: 236 239 245;
+  --muted: 148 158 180;
+  --brand: 167 139 250;
+  --brand-soft: 46 35 82;
+  --brand-ink: 196 181 253;
+  --ok: 74 222 128;
+  --ok-soft: 20 54 36;
+  --warn: 251 191 36;
+  --warn-soft: 66 48 14;
+  --bad: 248 113 113;
+  --bad-soft: 69 26 26;
+  --chart-1: #3987e5;
+  --chart-2: #d95926;
+  --chart-3: #199e70;
+  --chart-4: #c98500;
+  --chart-seq: #3987e5;
+  --chart-grid: #2a2f3f;
+  color-scheme: dark;
+}
+
+html, body { height: 100%; }
+body {
+  @apply bg-bg text-ink antialiased;
+  font-feature-settings: "cv11", "ss01";
+}
+
+@layer components {
+  .card { @apply rounded-2xl border border-line bg-surface shadow-card; }
+  .btn { @apply inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-sm font-medium transition
+    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 disabled:pointer-events-none disabled:opacity-50; }
+  .btn-primary { @apply btn bg-brand text-white hover:brightness-110 dark:text-[#120a24]; }
+  .btn-secondary { @apply btn border border-line bg-surface text-ink hover:bg-subtle; }
+  .btn-ghost { @apply btn text-muted hover:bg-subtle hover:text-ink; }
+  .btn-danger { @apply btn bg-bad text-white hover:brightness-110; }
+  .input { @apply h-10 w-full rounded-lg border border-line bg-surface px-3 text-sm text-ink placeholder:text-muted/70
+    focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 disabled:opacity-60; }
+  .label { @apply mb-1.5 block text-sm font-medium text-ink; }
+  .help { @apply mt-1 text-xs text-muted; }
+  .th { @apply px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-muted; }
+  .td { @apply px-4 py-3 text-sm; }
+  .skeleton { @apply animate-pulse rounded-md bg-subtle; }
+}
+
+/* Recharts tooltip */
+.recharts-default-tooltip { border-radius: 10px !important; border-color: rgb(var(--line)) !important;
+  background: rgb(var(--surface)) !important; box-shadow: 0 8px 24px rgb(0 0 0 / .12); }
+.recharts-tooltip-label { color: rgb(var(--ink)); font-weight: 600; margin-bottom: 4px; }
+.recharts-text { fill: rgb(var(--muted)); font-size: 12px; }
+
+::selection { background: rgb(var(--brand) / .2); }
