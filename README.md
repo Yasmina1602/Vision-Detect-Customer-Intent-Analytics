@@ -41,16 +41,74 @@ cd apps\api
 py -3.11 -m venv .venv
 .\.venv\Scripts\pip install -r requirements.txt
 .\.venv\Scripts\python -m alembic upgrade head
+.\.venv\Scripts\python scripts\seed_demo.py
 .\.venv\Scripts\python scripts\create_superadmin.py --email admin@sizning.uz --password <parol>
 .\.venv\Scripts\python -m uvicorn app.main:app --reload --port 8000
+```
 
-# ikkinchi terminal
+API terminalini ochiq qoldiring. **Ikkinchi PowerShell terminalida**, loyiha ildizidan:
+
+```powershell
 cd apps\dashboard
 npm install
 npm run dev                     # http://localhost:3000
 ```
 
 Dashboard'da "Ro'yxatdan o'tish" orqali do'kon oching yoki admin → Do'konlar → "Do'kon yaratish".
+
+## 1.1. Interfeyslar va ishlash tartibi
+
+Lokal ishga tushirgandan so'ng loyihaning quyidagi sahifa va oynalarini sinab ko'rish mumkin:
+
+1. **Savdo do'koni analitikasi** — Dashboard'dagi do'kon boshqaruv sahifasi. Bu yerda qidiruvlar,
+   savatga qo'shishlar, xaridlar, yo'qotilgan daromad, konversiya va xaridorlar voronkasi ko'rsatiladi.
+   Sana oralig'ini almashtirib, do'kon hodisalari bo'yicha hisobotlarni ko'rish mumkin.
+2. **Admin panel** — platforma darajasidagi boshqaruv sahifasi. Do'konlarni boshqarishdan tashqari,
+   ma'lumotlar bazasi, kesh va AI xizmatining holati hamda fon vazifalarini kuzatish mumkin.
+   Holat kartalari muhitga qarab o'zgaradi: masalan, Redis ulanmagan bo'lsa kesh xotirada ishlaydi.
+3. **Sinov do'koni** — API ichidagi sodda demo vitrina (`/demo/vanilla`). Mahsulotlarni ko'rish,
+   qidiruv oynasidan foydalanish va vidjetni haqiqiy do'konga qo'shishdan oldin tekshirish uchun.
+4. **Rasm orqali qidiruv oynasi** — demo do'kon yoki integratsiyalangan savdo saytida kamera
+   tugmasini bosing. Rasmni tanlang yoki oynaga tashlang. JPEG, PNG va WebP, 5 MB gacha qabul qilinadi.
+   Rasm qidiruv vaqtida tahlil qilinadi; demo oynasida ko'rsatilganidek, u saqlanmaydi.
+5. **Qidiruv natijalari** — tizim rasmni tahlil qilib, katalogdagi o'xshash mahsulotlarni moslik
+   foizi, nomi va narxi bilan ko'rsatadi. Natijadan mahsulotni ko'rish yoki savatga qo'shish mumkin.
+   Qidiruv hodisasi tegishli do'konning Dashboard analitikasida aks etadi.
+
+### Lokal sinov ketma-ketligi
+
+1. MySQL’da `vision_basic` bazasini yarating, `.env` faylida `DATABASE_URL`ni shu bazaga ulang.
+2. API’ni yoqing va migratsiyalarni bajaring. `seed_demo.py` demo mahsulotlar/do'konni tayyorlaydi;
+   `create_superadmin.py` esa admin hisobini yaratadi.
+3. Ikkinchi terminalda Dashboard’ni yoqing. Admin hisobiga kiring va do'konlar ro'yxatidan
+   `Demo Shop`ni tanlang — analitika shu do'konning hodisalarini ko'rsatadi.
+4. `http://127.0.0.1:8000/demo/vanilla` sahifasini oching, kamera tugmasidan poyabzal rasmini
+   yuklang va o'xshash mahsulotlar ro'yxati chiqqanini tekshiring.
+5. Natija yoki qidiruv jurnali Dashboard’da ko'rinmasa, API ishlayotganini
+   `http://127.0.0.1:8000/readyz` orqali tekshiring. Demo ma'lumotlarni qayta kiritish zarur
+   bo'lsa, API papkasida `.\.venv\Scripts\python scripts\seed_demo.py` buyrug'ini takrorlang.
+
+### Skrinshotlar
+
+**1-rasm — Savdo do'koni analitikasi**
+
+![Savdo do'koni analitikasi: qidiruvlar, savatlar, konversiya va voronka](docs/screenshots/01-dashboard-analytics.png)
+
+**2-rasm — Platforma admin paneli**
+
+![Admin panel: tizim holati, AI, kesh va fon vazifalari](docs/screenshots/02-admin-status.png)
+
+**3-rasm — Sinov uchun Demo Shop**
+
+![Demo Shop: mahsulotlar ro'yxati va qidiruv oynasi](docs/screenshots/03-demo-shop.png)
+
+**4-rasm — Rasm orqali qidiruv oynasi**
+
+![Rasm yuklash oynasi va qo'llab-quvvatlanadigan formatlar](docs/screenshots/04-image-search-upload.png)
+
+**5-rasm — Rasm qidiruvi natijalari**
+
+![Aniqlangan belgilar va mos mahsulotlar natijasi](docs/screenshots/05-image-search-results.png)
 
 ---
 
